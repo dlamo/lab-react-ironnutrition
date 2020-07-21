@@ -1,77 +1,69 @@
-import React, { useState } from 'react'
+import React, { useReducer } from 'react'
 import FoodList from '../view/FoodList/FoodList'
-import foods from '../foods.json'
+import {
+    initialState, 
+    foodReducer, 
+    NEW_FOODBOX, 
+    ADD_FOODBOX, 
+    SHOW_FORM, 
+    SEARCH_FOOD, 
+    NEW_TODAYS, 
+    ADD_TODAYS, 
+    DELETE_TODAYS
+} from '../reducers/foodReducer'
 
 function FoodListCt() {
-    const foodInitialState = {
-        foods: foods,
-        newFood: {
-            name: '',
-            calories: 0,
-            image: '',
-            quantity: 0
-        },
-        showForm: false,
-        searchBar: '',
-        todayList: []
-    }
-    const [state, setState] = useState(foodInitialState)
+    const [state, dispatch] = useReducer(foodReducer, initialState)
     const handleChangeForm = ({target}) => {
-        setState(state => ({
-            ...state,
-            newFood: {
-                ...state.newFood,
+        dispatch({
+            type: NEW_FOODBOX,
+            payload: {
                 [target.name]: target.value
             }
-        }))
+        })
     }
     const handleSubmitForm = e => {
         e.preventDefault()
-        setState(state => ({
-            ...state,
-            foods: [...state.foods, state.newFood],
-            showForm: false
-        }))
+        dispatch({
+            type: ADD_FOODBOX
+        })
     }
     const handleNewFoodBtn = () => {
-        setState(state => ({
-            ...state,
-            showForm: true
-        }))
+        dispatch({
+            type: SHOW_FORM
+        })
     }
     const handleSearchBar = ({target}) => {
-        setState(state => ({
-            ...state,
-            searchBar: target.value
-        }))
+        dispatch({
+            type: SEARCH_FOOD,
+            payload: {
+                searchBar: target.value
+            }
+        })
     }
     const handleFoodQuantity = ({target}) => {
-        const newFoodState = state.foods.map(food => food.name === target.name ? ({...food, quantity: food.quantity + 1}) : food)
-        setState(state => ({
-            ...state,
-            foods: newFoodState 
-        }))
+        dispatch({
+            type: NEW_TODAYS,
+            payload: {
+                target: target
+            }
+        })
     }
     const handleAddFood = ({target}) => {
-        const foodToAdd = state.foods.filter(food => food.name === target.name)
-        const indexFood = state.todayList.findIndex(food => food.name === target.name)
-        let todayListUpdated = []
-        if (indexFood === -1) {
-            todayListUpdated = [...state.todayList, ...foodToAdd]
-        } else {
-            todayListUpdated = state.todayList.map(food => food.name !== target.name ? food : {...food, quantity: food.quantity + foodToAdd[0].quantity})
-        }
-        setState(state => ({
-            ...state,
-            todayList: todayListUpdated
-        })) 
+        dispatch({
+            type: ADD_TODAYS,
+            payload: {
+                target: target
+            }
+        })
     }
     const handleDeleteOnToday = ({target}) => {
-        const todayListUpdated = state.todayList.filter(food => food.name !== target.id)
-        setState(state => ({
-            ...state,
-            todayList: todayListUpdated
-        })) 
+        dispatch({
+            type: DELETE_TODAYS,
+            payload: {
+                target: target
+            }
+        })
     }
     return (
         <FoodList 
